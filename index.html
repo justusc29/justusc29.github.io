@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌊 100 MOUNTAINS</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: white;
+    color: black;
+    font-family: 'Roboto', Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+#stage {
+    flex: 1;
+    padding-top: 1%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+#slide, #map {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+#map {
+    display: none;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+
+    width: fit-content;
+    margin: 0 auto;
+    padding: 0;
+}
+
+#prevBtn,
+#nextBtn,
+#audioBtn {
+    width: 40px;
+    text-align: center;
+}
+
+#audioBtn img {
+    width: 29px;
+    height: 29px;
+    display: block;
+    transition: filter 0.15s ease;
+}
+
+#audioBtn:hover img {
+    filter: sepia(1) saturate(4) brightness(0.9);
+}
+
+.controls button {
+    padding: 10px 0px;
+}
+
+button {
+    padding: 10px 0px;
+    font-size: 22px;
+    cursor: pointer;
+    background: none;
+    color: black;
+    border: 0;
+    border-radius: 6px;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+#counter {
+    width: 80px;
+    text-align: center;
+    color: black;
+}
+
+#audio {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="stage">
+    <img id="slide" src="0.jpg">
+
+    <iframe
+        id="map"
+        src="https://www.google.com/maps/d/embed?mid=12tu3e-cguyScCSqpEBsyft4JgIbLYTQ&ehbc=2E312F">
+    </iframe>
+</div>
+
+<div class="controls">
+
+    <button id="prevBtn" onclick="prev()">◁</button>
+
+    <span id="counter"></span>
+
+
+    <button id="nextBtn" onclick="next()">▷</button>
+    <button id="audioBtn" onclick="toggleAudio()">
+        <img id="audioIcon" src="images/vol_mute.png" alt="Mute">
+    </button>
+
+</div>
+
+<audio id="audio" loop>
+    <source src="audio/samyung-mulansdecision.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const images = Array.from({ length: 17 }, (_, i) => `images/${i}.jpg`);
+const MAP_INDEX = images.length;
+
+let current = 0;
+let musicStarted = false;
+
+const slide = document.getElementById("slide");
+const map = document.getElementById("map");
+const counter = document.getElementById("counter");
+const audio = document.getElementById("audio");
+
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const muteBtn = document.getElementById("muteBtn");
+
+const audioBtn = document.getElementById("audioBtn");
+
+let audioState = 0; // 0 loud, 1 quiet, 2 mute
+
+function toggleAudio() {
+    startMusicOnce();
+    audioState = (audioState + 1) % 3;
+
+    if (audioState === 0) {
+        audio.volume = 0.0;
+        audio.muted = true;
+        audioIcon.src = "images/vol_mute.png";
+    }
+
+    if (audioState === 1) {
+        audio.volume = 0.4;
+        audio.muted = false;
+        audioIcon.src = "images/vol_down.png";
+    }
+
+    if (audioState === 2) {
+        audio.volume = 1.0;
+        audio.muted = false;
+        audioIcon.src = "images/vol_up.png";
+    }
+}
+
+function startMusicOnce() {
+    if (musicStarted) return;
+    musicStarted = true;
+    audio.play().catch(() => {});
+}
+
+function update() {
+
+    const isMap = current === MAP_INDEX;
+
+    slide.style.display = isMap ? "none" : "block";
+    map.style.display = isMap ? "block" : "none";
+
+    if (!isMap) {
+        slide.src = images[current];
+    }
+
+    counter.textContent = (current >= 1 && current <= 16)
+        ? String(current).padStart(2, "0") + " / 16"
+        : "";
+
+    // always update BOTH buttons every time (fixes bug)
+    prevBtn.classList.toggle("hidden", current === 0);
+
+    nextBtn.classList.toggle(
+        "hidden",
+        current === MAP_INDEX
+    );
+}
+
+function next() {
+    if (current < MAP_INDEX) current++;
+    update();
+}
+
+function prev() {
+    if (current > 0) current--;
+    update();
+}
+
+update();
+</script>
+
+</body>
+</html>
